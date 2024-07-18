@@ -34,6 +34,16 @@ export const getUser = async (userId: string) => {
     }
 }
 
+// get user by email
+export const checkEmailExists = async (email: string) => {
+  try {
+    const user = await users.list([Query.equal('email', email)]);
+    return user.total > 0;
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 // REGISTER PATIENT
 export const registerPatient = async ({ identificationDocument, ...patient }:
   RegisterUserParams

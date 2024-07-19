@@ -13,7 +13,7 @@ import SubmitButton from "../SubmitButton"
 import { useState } from "react"
 import { UserFormValidation } from "@/lib/validation"
 import { useRouter } from "next/navigation"
-import { checkEmailExists, createUser } from "@/lib/actions/patient.actions"
+import { checkEmailExists, createUser, getUserByEmail } from "@/lib/actions/patient.actions"
 
 export enum FormFieldType {
     INPUT = 'input',
@@ -45,21 +45,31 @@ export const PatientForm = () => {
     setIsLoading(true);
 
     try {
-      const userData = { name, email, phone };
-      const user = await createUser(userData);
-      const emailExists = await checkEmailExists(email);
 
+      const emailExists = await checkEmailExists(email);
       if (emailExists){
-        router.push(`/patients/${user.$id}/new-appointment`)
-      } else if (user) {
-        router.push(`/patients/${user.$id}/register`)
+        const existingUser = await getUserByEmail(email)
+        // If the email exists, redirect to the new appointment page
+        if(existingUser){
+          router.push(`/patients/${existingUser.$id}/new-appointment`);
+          return;
+        }
       }
-      // if (user) router.push(`/patients/${user.$id}/register`)
+
+      // if email doesn't exist, create the user
+      const userData = { name, email, phone };
+      const newUser = await createUser(userData);
+      if (newUser) {
+        router.push(`/patients/${newUser.$id}/register`);
+    }
+  
 
     } catch (error) {
       console.log(error)
     }
+    setIsLoading(false);
   }
+  
 
   return (
     <Form {...form}>

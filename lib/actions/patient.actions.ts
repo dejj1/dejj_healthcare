@@ -34,13 +34,24 @@ export const getUser = async (userId: string) => {
     }
 }
 
-// get user by email
+// check if user email already exists
 export const checkEmailExists = async (email: string) => {
   try {
     const user = await users.list([Query.equal('email', email)]);
     return user.total > 0;
   } catch (error) {
     console.log(error)
+  }
+}
+
+// get user by email
+export const getUserByEmail = async (email: string): Promise<any | null> => {
+  try {
+    const user = await users.list([Query.equal('email', email)]);
+    return user.total > 0 ? user.users[0] : null;
+  } catch (error) {
+    console.error('Error getting user by email:', error);
+    return null;
   }
 }
 
